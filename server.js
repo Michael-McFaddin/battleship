@@ -36,4 +36,41 @@ io.on('connection', socket => {
 
   // Ignore player 3
   if (playerIndex === -1) return;
+
+  connections[playerIndex] = false;
+
+  // Tell everyone what player number just connected
+  socket.broadcast.emit('player-connection', playerIndex);
+
+  // Handle Disconnect
+  socket.on('disconnect', () => {
+    console.log(`Player ${playerIndex} disconnected`)
+    connections[playerIndex] = null;
+    // Tell everyone what player number just disconnected
+    socket.broadcast.emit('player-connection', playerIndex);
+  });
+
+  // On Ready
+  socket.on('player-ready', () => {
+    socket.broadcast.emit('enemy-ready', playerIndex);
+    connections[playerIndex] = true;
+  });
+
+  // Check player connections
+  socket.on('check-players', () => {
+    const players = [];
+    for (const i in connections) {
+      connections[i] === null ? players.push({connected: false, ready: false}) : 
+      players.push({connected: true, ready: connections[i]});
+    }
+    socket.emit('check-players', players);
+  });
+
+  // On Fire Received
+  socket.on('fire', id => {
+    console.log(`Shot fired from ${playerIndex}`, id);
+
+    // Emit the move to the other player
+    socket.broadcast.emit('fire', id);
+  })
 });

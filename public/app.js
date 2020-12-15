@@ -60,8 +60,65 @@ document.addEventListener('DOMContentLoaded', () => {
 				if (playerNum === 1) currentPlayer = 'enemy';
 
 				console.log(playerNum);
+
+				// Get other player status
+				socket.emit('check-players');
 			}
 		});
+
+		// Another player has connected or disconnected
+		socket.on('player-connection', num => {
+			console.log(`Player number ${num} has connected or disconnected`);
+			playerConnectedOrDisconnected(num);
+		});
+
+		// On Enemy Ready
+		socket.on('enemy-ready', num => {
+			enemyReady = true;
+			playerReady(num);
+			if (ready) playGameMulti(socket);
+		});
+
+		// Check player status
+		socket.on('check-players', players => {
+			players.forEach((p, i) => {
+				if (p.connected) playerConnectedOrDisconnected(i);
+				if (p.ready) {
+					playerReady(i)
+					if (i !== playerReady) enemyReady = true;
+				}
+			});
+		});
+
+		// Ready button click
+		startButton.addEventListener('click', () => {
+			if (allShipsPlaced) playGameMulti(socket)
+			else infoDisplay.innerHTML = 'Please place all ships'
+		});
+
+		// Setup event listener for firing
+		computerSquares.forEach(square => {
+			square.addEventListener('click', () => {
+				if (currentPlayer === 'user' && ready && enemyReady) {
+					shotFired = square.dataset.id;
+					socket.emit('fire', shotFired);
+				}
+			});
+		});
+
+		// On Fire Recieved
+		socket.on('fire', id => {
+			enemyGo(id);
+			const square = userSquares[id];
+			socket.emit('fire-reply', square.classList);
+			playGameMulti(socket);
+		});
+
+		function playerConnectedOrDisconnected(num) {
+			let player = `.p${parseInt(num) + 1}`;
+			document.querySelector(`${player} .connected span`).classList.toggle('green');
+			if (parseInt(num) === playerNum) document.querySelector(player).style.fontWeight = 'bold';
+		}
 	}
 
 	// Create board
@@ -260,16 +317,42 @@ document.addEventListener('DOMContentLoaded', () => {
 		} else return;
 
 		displayGrid.removeChild(draggedShip);
+		if (!displayGrid.querySelector('.ship')) allShipsPlaced = true;
 	}
 
 	function dragEnd() {
 		console.log('dragend');
 	}
 
-	//Game logic
+	// Game logic for multiplayer
+	function playGameMulti(socket) {
+		if (isGameOver) return;
+		if (!ready) {
+			socket.emit('player-ready');
+			ready = true;
+			playerReady(playerNum);
+		}
+
+		if (enemyReady) {
+			if (currentPlayer === 'user') {
+				turnDisplay.innerHTML = "Your Go";
+			}
+			if (currentPlayer === 'enemy') {
+				turnDisplay.innerHTML = "Enemy's Go";
+			}
+		}
+	}
+
+	function playerReady(num) {
+		let player = `.p${parseInt(num) + 1}`;
+		document.querySelector(`${player} .ready span`).classList.toggle('green');
+
+	}
+
+	// Game logic for sinlge player
 	function playGameSingle() {
-		startButton.innerHTML = 'Reset Game';
-		startButton.addEventListener('click', () => window.location.reload());
+		// startButton.innerHTML = 'Reset Game';
+		// startButton.addEventListener('click', () => window.location.reload());
 		console.log('Game has started');
 		if (isGameOver) return;
 		if (currentPlayer === 'user') {
@@ -280,7 +363,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		}
 		if (currentPlayer === 'computer') {
 			turnDisplay.innerHTML = 'Computers Go';
-			setTimeout(computerGo, 1000);
+			setTimeout(enemyGo, 1000);
 		}
 	}
 
@@ -314,7 +397,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	let cpuBattleshipCount = 0;
 	let cpuCarrierCount = 0;
 
-	function computerGo() {
+	function enemyGo() {
 		let random = Math.floor(Math.random() * userSquares.length)
 		if (!userSquares[random].classList.contains('boom')) {
 			userSquares[random].classList.add('boom');
@@ -324,7 +407,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			if (userSquares[random].classList.contains('battleship')) cpuBattleshipCount++;
 			if (userSquares[random].classList.contains('carrier')) cpuCarrierCount++;
 			checkForWins();
-		} else computerGo();
+		} else enemyGo();
 		currentPlayer = 'user';
 		turnDisplay.innerHTML = 'Your Go';
 	}
