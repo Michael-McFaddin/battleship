@@ -13,56 +13,13 @@ document.addEventListener('DOMContentLoaded', () => {
 	const rotateButton = document.querySelector('#rotate');
 	const turnDisplay = document.querySelector('#whose-go');
 	const infoDisplay = document.querySelector('#info');
-	const singlePlayerButton = document.querySelector('#singlePlayerButton');
-	const multiPlayerButton = document.querySelector('#multiPlayerButton');
 	const userSquares = [];
 	const computerSquares = [];
 	let isHorizontal = true;
 	let isGameOver = false;
 	let currentPlayer = 'user';
 	const width = 10;
-	let gameMode = '';
-	let playerNum = 0;
-	let ready = false;
-	let enemyReady = false;
-	let allShipsPlaced = false;
-	let shotFired = -1;
 
-	// Select Player Mode
-	singlePlayerButton.addEventListener('click', startSinglePlayer);
-	multiPlayerButton.addEventListener('click', startMultiPlayer);
-
-	// Single Player
-	function startSinglePlayer() {
-		gameMode = 'singlePlayer';
-
-		generate(shipArray[0]);
-		generate(shipArray[1]);
-		generate(shipArray[2]);
-		generate(shipArray[3]);
-		generate(shipArray[4]);
-
-		startButton.addEventListener('click', playGameSingle);
-	}
-
-	// Multiplayer 
-	function startMultiPlayer() {
-		gameMode = 'multiPlayer';
-
-		const socket = io();
-
-		// Get your player number
-		socket.on('player-number', num => {
-			if (num === -1) {
-				infoDisplay.innerHTML = 'Sorry, the serve is full';
-			} else {
-				playerNum = parseInt(num);
-				if (playerNum === 1) currentPlayer = 'enemy';
-
-				console.log(playerNum);
-			}
-		});
-	}
 
 	// Create board
 	function createBoard(grid, squares) {
@@ -152,6 +109,12 @@ document.addEventListener('DOMContentLoaded', () => {
 			generate(ship);
 		}
 	}
+
+		generate(shipArray[0]);
+		generate(shipArray[1]);
+		generate(shipArray[2]);
+		generate(shipArray[3]);
+		generate(shipArray[4]);
 
 	// Rotate the ships
 	function rotate() {
@@ -267,6 +230,9 @@ document.addEventListener('DOMContentLoaded', () => {
 	}
 
 	//Game logic
+
+	startButton.addEventListener('click', playGameSingle);
+
 	function playGameSingle() {
 		startButton.innerHTML = 'Reset Game';
 		startButton.addEventListener('click', () => window.location.reload());
