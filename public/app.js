@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	const rotateButton = document.querySelector('#rotate');
 	const turnDisplay = document.querySelector('#whose-go');
 	const infoDisplay = document.querySelector('#info');
+	const setupButtons = document.getElementById('setup-buttons');
 	const userSquares = [];
 	const computerSquares = [];
 	let isHorizontal = true;
@@ -82,7 +83,10 @@ document.addEventListener('DOMContentLoaded', () => {
 		generate(shipArray[3]);
 		generate(shipArray[4]);
 
-		startButton.addEventListener('click', playGameSingle);
+		startButton.addEventListener('click', () => {
+			setupButtons.style.display = 'none';
+			playGameSingle();
+		});
 	}
 
 	// Multiplayer 
@@ -114,7 +118,10 @@ document.addEventListener('DOMContentLoaded', () => {
 		socket.on('enemy-ready', num => {
 			enemyReady = true;
 			playerReady(num);
-			if (ready) playGameMulti(socket);
+			if (ready) {
+				playGameMulti(socket);
+				setupButtons.style.display = 'none';
+			}
 		});
 
 		// Check player status

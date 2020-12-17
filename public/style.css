@@ -102,26 +102,76 @@ body {
 .taken,
 .ship {
 	background-color: hsl(0, 0%, 80%);
+	position: relative;
 }
 
-.taken.start.horizontal {
+.taken.start.horizontal,
+.taken.start.horizontal::before {
 	border-top-left-radius: 50%;
 	border-bottom-left-radius: 50%;
 }
 
-.taken.end.horizontal {
+.taken.end.horizontal,
+.taken.end.horizontal::before {
 	border-top-right-radius: 50%;
 	border-bottom-right-radius: 50%;
 }
 
-.taken.start.vertical {
+.taken.start.vertical,
+.taken.start.vertical::before {
 	border-top-left-radius: 50%;
 	border-top-right-radius: 50%;
 }
 
-.taken.end.vertical {
+.taken.end.vertical,
+.taken.end.vertical::before {
 	border-bottom-left-radius: 50%;
 	border-bottom-right-radius: 50%;
+}
+
+.taken.vertical::before,
+.taken.horizontal::before {
+	content: '';
+	position: absolute;
+	border: .3vmin solid white;
+	top: -1px;
+	bottom: -1px;
+	left: -1px;
+	right: -1px;
+}
+
+.taken.horizontal::before {
+	animation: ripplesY 3s linear infinite;
+	border-left: none;
+	border-right: none;
+}
+
+.taken.vertical::before {
+	animation: ripplesX 3s linear infinite;
+	border-top: none;
+	border-bottom: none;
+}
+
+@keyframes ripplesX {
+	0% {
+		opacity: 1;
+		transform: scaleX(1);
+	}
+	100% {
+		opacity: 0;
+		transform: scaleX(1.5);
+	}
+}
+
+@keyframes ripplesY {
+	0% {
+		opacity: 1;
+		transform: scaleY(1);
+	}
+	100% {
+		opacity: 0;
+		transform: scaleY(1.5);
+	}
 }
 
 .destroyer-container {
@@ -172,13 +222,60 @@ body {
 	margin: 1rem;
 }
 
+.miss,
 .boom {
-	background-color: red;
+	display: flex;
+	justify-content: center;
+	align-items: center;
 }
 
-.miss {
-	background-color: black;
+.boom::after,
+.miss::after {
+	content: '';
+	position: absolute;
+	border-radius: 100%;
+	width: 2vmin;
+	height: 2vmin;
 }
+
+.miss::after {
+	background-color: white;
+}
+
+.boom::after {
+	 background-color: red;
+ }
+
+ .miss::before,
+ .boom::before {
+	 content: '';
+	 position: absolute;
+	 animation: hit .2s ease-out forwards;
+	 border-width: .1vmin;
+	 border-style: solid;
+	 border-radius: 100%;
+	 width: 2vmin;
+	 height: 2vmin;
+ }
+
+ .boom::before {
+	 border-color: red;
+ }
+
+ .miss::before {
+	 border-color: white;
+ }
+
+ @keyframes hit {
+	 0% {
+		opacity: 1;
+		transform: scale(0);
+	 }
+	 100% {
+		opacity: 0;
+		transform: scale(4);
+	 }
+ }
 
 .connected, .ready {
 	font-weight: normal;
