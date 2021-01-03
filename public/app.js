@@ -1,3 +1,4 @@
+/* eslint-disable curly */
 /* eslint-disable indent */
 document.addEventListener('DOMContentLoaded', () => {
 	const userGrid = document.querySelector('.grid-user');
@@ -172,7 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 		function playerConnectedOrDisconnected(num) {
 			let player = `.p${parseInt(num) + 1}`;
-			document.querySelector(`${player} .connected span`).classList.toggle('green');
+			document.querySelector(`${player} .connected`).classList.toggle('active');
 			if (parseInt(num) === playerNum) document.querySelector(player).style.fontWeight = 'bold';
 		}
 	}
@@ -349,6 +350,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	// Game logic for multiplayer
 	function playGameMulti(socket) {
+		setupButtons.style.display = 'none';
 		if (isGameOver) return;
 		if (!ready) {
 			socket.emit('player-ready');
@@ -368,7 +370,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	function playerReady(num) {
 		let player = `.p${parseInt(num) + 1}`;
-		document.querySelector(`${player} .ready span`).classList.toggle('green');
+		document.querySelector(`${player} .ready`).classList.toggle('active');
 
 	}
 
@@ -427,7 +429,9 @@ document.addEventListener('DOMContentLoaded', () => {
 	function enemyGo(square) {
 		if (gameMode === 'singlePlayer') square = Math.floor(Math.random() * userSquares.length);
 		if (!userSquares[square].classList.contains('boom')) {
-			userSquares[square].classList.add('boom');
+			const hit = userSquares[square].classList.contains('taken');
+			userSquares[square].classList.add(hit ? 'boom' : 'miss');
+			// userSquares[square].classList.add('boom');
 			if (userSquares[square].classList.contains('destroyer')) cpuDestroyerCount++;
 			if (userSquares[square].classList.contains('submarine')) cpuSubmarineCount++;
 			if (userSquares[square].classList.contains('cruiser')) cpuCruiserCount++;
